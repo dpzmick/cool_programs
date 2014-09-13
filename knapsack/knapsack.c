@@ -58,6 +58,8 @@ item_t *** configuration_maker(size_t k, item_t * items, size_t num_items, size_
     // I will have 2 * number of prev_num_confs
     item_t *** my_config = malloc( 2 * prev_num_confs * sizeof *** my_config );
 
+    // TODO fix memory leak
+
     for (size_t i = 0; i < prev_num_confs; ++i) {
         size_t ii = i + prev_num_confs;
         my_config[i] = malloc( k * sizeof ** my_config );
@@ -116,10 +118,6 @@ int main(int argc, char *argv[]) {
 
     double max_weight = atof(argv[2]);
 
-    // We aren't sure how many items are in the file. So, we will make enough
-    // space for a limited set of items, if the array fills up we can make it
-    // larger later
-
     size_t space = 10;
     size_t used = 0;
     item_t * items = malloc( space * sizeof * items );
@@ -134,9 +132,6 @@ int main(int argc, char *argv[]) {
     ssize_t read;
 
     while ( (read = getline(&name_str, &n_name, fp)) != -1 ) {
-        // read one item out of the file
-        // at this point line holds the items name, now we need to get the
-        // item's weight and value
         if ((read = getline(&weight_str, &n_weight, fp)) == -1) {
             fprintf(stderr, "Invalid input format\n");
         }
@@ -154,7 +149,6 @@ int main(int argc, char *argv[]) {
 
         // check if we have enough space to hold this item
         if (used == space - 1) {
-            // we are out of space
             space = space*2;
             items = realloc(items, space * sizeof * items);
         }
