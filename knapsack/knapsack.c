@@ -58,8 +58,6 @@ item_t *** configuration_maker(size_t k, item_t * items, size_t num_items, size_
     // I will have 2 * number of prev_num_confs
     item_t *** my_config = malloc( 2 * prev_num_confs * sizeof *** my_config );
 
-    // TODO fix memory leak
-
     for (size_t i = 0; i < prev_num_confs; ++i) {
         size_t ii = i + prev_num_confs;
         my_config[i] = malloc( k * sizeof ** my_config );
