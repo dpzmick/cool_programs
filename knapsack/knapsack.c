@@ -182,12 +182,10 @@ int main(int argc, char *argv[]) {
         double mw = configuration_weight(confs[i], k);
         double mv = configuration_value(confs[i], k);
         //printf("mw: %f mv: %f\n", mw, mv);
-        if (mw <= max_weight) {
-            if (mv > best_value) {
-                free(best_conf);
-                best_conf = confs[i];
-                best_value = mv;
-            }
+        if (mw <= max_weight && mv > best_value) {
+            free(best_conf);
+            best_conf = confs[i];
+            best_value = mv;
         } else {
             free(confs[i]);
         }
