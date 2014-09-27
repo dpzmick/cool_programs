@@ -36,6 +36,10 @@ var hanoi_game = function(num_disks, animator) {
         hanoi_inner(pegs.length, 0, 2, 1);
     }
 
+    this.finish_animation = function() {
+        animator.finish_animation();
+    }
+
 }
 
 /*******************
@@ -55,6 +59,9 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
     var peg_counts = Array();
 
     var canvas = SVG(html_element).size(this.width, this.height);
+    this.done = true;
+
+    var stack = Array();
 
     var draw_pegs = function() {
         var peg_loc = right_left_pad;
@@ -87,11 +94,39 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
     }
 
     this.move_disk = function(d, src, dest) {
+        if ( !this.done ) {
+            stack.push( {disk: d, src: src, dest: dest} );
+            return;
+        }
+
+        this.done = false; // mutex?
+
         if (src != -1) {
             peg_counts[src] -= 1;
         }
+
         peg_counts[dest] += 1;
-        disks[d].animate().move(peg_x_coord(dest), peg_y_coord(dest));
+        disks[d].animate().move(peg_x_coord(dest), peg_y_coord(dest)).after(
+                function() { this.done = true; console.log("done"); });
+    }
+
+    var finish_move = function(d, src, dest) {
+    }
+
+    this.finish_animation = function() {
+        if (stack.length == 0) {
+            return;
+        }
+        var dest = stack[0].dest;
+        var src = stack[0].src;
+        var d = stack[0].disk;
+
+        stack.shift();
+
+        peg_counts[dest] += 1;
+        var outer_this = this;
+        disks[d].animate().move(peg_x_coord(dest), peg_y_coord(dest)).after(
+                function() { outer_this.finish_animation(); });
     }
 
     draw_pegs();
@@ -104,3 +139,4 @@ disks = 3
 D = new hanoi_vis('drawing', 20, 10, 300, 300, disks);
 G = new hanoi_game(disks, D);
 G.solve();
+G.finish_animation();
