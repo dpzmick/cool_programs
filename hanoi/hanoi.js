@@ -11,9 +11,9 @@ var hanoi_game = function(num_disks, animator) {
     pegs[1] = Array();
     pegs[2] = Array();
 
-    animator.move_disk(2, -1, 0);
-    animator.move_disk(1, -1, 0);
-    animator.move_disk(0, -1, 0);
+    for (var i = num_disks - 1 ; i >= 0; i--) {
+        animator.move_disk(i, -1, 0);
+    }
 
     var hanoi_inner = function(pegs, src, dest, intermediate) {
         if (pegs == 0) {
@@ -33,7 +33,7 @@ var hanoi_game = function(num_disks, animator) {
     }
 
     this.solve = function() {
-        hanoi_inner(pegs.length, 0, 2, 1);
+        hanoi_inner(disks.length, 0, 2, 1);
     }
 
     this.finish_animation = function() {
@@ -50,7 +50,7 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
     this.width = width;
     this.height = height;
 
-    var right_left_pad = peg_width;
+    var right_left_pad = peg_width + 100;
     var peg_spacing = (width - 3*peg_width - 2*right_left_pad) / 3;
 
     var pegs = Array();
@@ -78,19 +78,19 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
     // draws the disks off screen, they can later be moved into the appropriate
     // locations
     var draw_disks = function() {
-        position_x = width + 100;
-        position_y = height + 100;
+        position_x = -1000;
+        position_y = -1000;
 
         for (var i = 0; i < num_disks; i++) {
             disks[i] = canvas.rect(disk_width*(i+1), 10).attr({ fill: '#000000' });
         }
     }
 
-    var peg_x_coord = function(peg) {
-        return right_left_pad + peg_spacing * peg;
+    var xcoord_for_disk = function(peg, d) {
+        return right_left_pad + peg_spacing * peg - d*5;
     }
-    var peg_y_coord = function(peg) {
-        return peg_counts[peg] * 10;
+    var ycoord_for_disk = function(peg) {
+        return height - peg_counts[peg] * 10;
     }
 
     this.move_disk = function(d, src, dest) {
@@ -106,11 +106,8 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
         }
 
         peg_counts[dest] += 1;
-        disks[d].animate().move(peg_x_coord(dest), peg_y_coord(dest)).after(
+        disks[d].animate(20, '>', 0).move(xcoord_for_disk(dest, d), ycoord_for_disk(dest)).after(
                 function() { this.done = true; console.log("done"); });
-    }
-
-    var finish_move = function(d, src, dest) {
     }
 
     this.finish_animation = function() {
@@ -123,9 +120,13 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
 
         stack.shift();
 
+        if (src != -1) {
+            peg_counts[src] -= 1;
+        }
+
         peg_counts[dest] += 1;
         var outer_this = this;
-        disks[d].animate().move(peg_x_coord(dest), peg_y_coord(dest)).after(
+        disks[d].animate(20, '>', 0).move(xcoord_for_disk(dest, d), ycoord_for_disk(dest)).after(
                 function() { outer_this.finish_animation(); });
     }
 
@@ -135,8 +136,8 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
     return this;
 }
 
-disks = 3
-D = new hanoi_vis('drawing', 20, 10, 300, 300, disks);
+disks = 10
+D = new hanoi_vis('drawing', 10, 10, 1000, 300, disks);
 G = new hanoi_game(disks, D);
 G.solve();
 G.finish_animation();
