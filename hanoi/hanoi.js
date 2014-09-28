@@ -26,7 +26,6 @@ var hanoi_game = function(num_disks, animator) {
     }
 
     var move = function(src, dest) {
-        console.log("Moving peg from " + src + " to " + dest);
         disk = pegs[src].pop();
         pegs[dest].push(disk);
         animator.move_disk(disk-1, src, dest);
@@ -59,8 +58,8 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
     var peg_counts = Array();
 
     var canvas = SVG(html_element).size(this.width, this.height);
-    this.done = true;
 
+    var running = false;
     var stack = Array();
 
     var draw_pegs = function() {
@@ -94,23 +93,17 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
     }
 
     this.move_disk = function(d, src, dest) {
-        if ( !this.done ) {
-            stack.push( {disk: d, src: src, dest: dest} );
-            return;
+        stack.push( {disk: d, src: src, dest: dest} );
+
+        if (!running) {
+            console.log("in here");
+            run_animation();
         }
-
-        this.done = false; // mutex?
-
-        if (src != -1) {
-            peg_counts[src] -= 1;
-        }
-
-        peg_counts[dest] += 1;
-        disks[d].animate(20, '>', 0).move(xcoord_for_disk(dest, d), ycoord_for_disk(dest)).after(
-                function() { this.done = true; console.log("done"); });
     }
 
-    this.finish_animation = function() {
+    var run_animation = function() {
+        running = true;
+
         if (stack.length == 0) {
             return;
         }
@@ -125,9 +118,8 @@ var hanoi_vis = function(html_element, peg_width, disk_width, width, height, num
         }
 
         peg_counts[dest] += 1;
-        var outer_this = this;
-        disks[d].animate(20, '>', 0).move(xcoord_for_disk(dest, d), ycoord_for_disk(dest)).after(
-                function() { outer_this.finish_animation(); });
+        disks[d].animate(20, '>', 100).move(xcoord_for_disk(dest, d), ycoord_for_disk(dest)).after(
+                function() { run_animation(); running = false;});
     }
 
     draw_pegs();
@@ -140,4 +132,3 @@ disks = 10
 D = new hanoi_vis('drawing', 10, 10, 1000, 300, disks);
 G = new hanoi_game(disks, D);
 G.solve();
-G.finish_animation();
