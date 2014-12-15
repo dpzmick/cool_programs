@@ -34,11 +34,6 @@ var hanoi_game = function(num_disks, animator) {
     this.solve = function() {
         hanoi_inner(disks.length, 0, 2, 1);
     }
-
-    this.finish_animation = function() {
-        animator.finish_animation();
-    }
-
 }
 
 /*******************

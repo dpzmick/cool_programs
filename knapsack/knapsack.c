@@ -25,6 +25,8 @@ typedef struct _item {
     double value;
 } item_t;
 
+int call_count = 0;
+
 /**
  * Given k and a list of items, finds all possible ways to select k items from
  * the set.
@@ -33,6 +35,7 @@ typedef struct _item {
  * responsibility to free the memory associated with this array
  */
 item_t *** configuration_maker(size_t k, item_t * items, size_t num_items, size_t * num_confs) {
+    call_count += 1;
     if (k < 1) { // shouldn't go below zero for size_t
         *num_confs = 0;
         return NULL;
@@ -201,6 +204,8 @@ int main(int argc, char *argv[]) {
         printf("Couldn't find any valid configurations\n");
     }
     free(confs);
+
+    printf("call count: %d\n", call_count);
 
     // cleanup!
     free(items);
